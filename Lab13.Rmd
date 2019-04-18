@@ -141,4 +141,40 @@ percentileData
 My actual difference in means of the two groups was 1.33, represented by the blue vertical line in the histogram.  As a percentile, it is represented by the decimal number below the histogram. Looking at the graph influences me to accept the alternate hypothesis because it seems as if the distribution of mean differences is so spread out, it is not easily concluded that the vertical line is the center of the data. However, the percentile shows that the actual difference in means of the two groups is very close to the 50th percentile of the permutation data, so therefore I would lean towards accepting the null hypothesis.
 
 
+###Richard's Findings
 
+The map_dbl function is used here to calculate the mean of each column in my TrafficRichard dataset which represents the median number of traffic deaths per 100,000 people per country in 2002 and 2004.
+
+```{r, include = TRUE}
+
+TrafficRichard <- na.omit(trafficDataReal) %>%
+  select(`2002`,`2004`)
+
+as_tibble(TrafficRichard)%>%
+  map_dbl(median)
+```
+
+The function here accepts a data frame and a different function. From there, it loops through the data frame, applying the inputted function to each column.  In this case, I took my merged data set with each country's traffic deaths per 100,000 ppl in 2002 and 2004, and population density in 2002 and 2004.  I calculated the median and standard deviation of each column, showing a good distribution of the data in each column.
+
+```{r, include=TRUE}
+mergedRichardData <- mergedDataReal %>%
+  select(2:5)
+
+myColSummary <- function(df,myFun){
+  myOut <- vector("double", length(df))
+  for(i in seq(df)){
+    myOut[i] <- myFun(df[[i]])
+  }
+  return(myOut)
+}
+myColSummary(mergedRichardData,median)
+myColSummary(mergedRichardData,sd)
+
+```
+
+####Permutation
+Null: Difference in Medians between(Ratio.2004 and Ratio.2002) = Difference in Medians between(Random groupings of the 2)
+
+Alternate:Difference in Medians between(Ratio.2004 and Ratio.2002) != Difference in Medians between(Random groupings of the 2)
+
+Test Statistic: Sample Median
