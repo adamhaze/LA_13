@@ -74,6 +74,13 @@ myColSummary(mergedDataAdam,sd)
 
 ```
 
+####Permutation
+Null: Difference In Means between(Ratio.2004 and Ratio.2002) = Difference In Means between(Random groupings of the 2)
+
+Alternate:Difference In Means between(Ratio.2004 and Ratio.2002) != Difference In Means between(Random groupings of the 2)
+
+Test Statistic: Sample Mean
+
 ```{r}
 AdamData <- mergedDataReal %>%
   mutate(Ratio.2002 = `2002.popDensity` / `2002.trafficDeath`, 
@@ -91,6 +98,8 @@ differenceActual = mean2004 - mean2002
 
 testData <- AdamData %>%
   select(Ratio.2002, Ratio.2004)
+
+combined <- c(testData$Ratio.2002, testData$Ratio.2004)
 
 permutationAdam <- function(perms = 1000, values, n1)
 {
@@ -116,6 +125,20 @@ permutationAdam <- function(perms = 1000, values, n1)
   return(outputMean)
 }
 
-permutationAdam()
+resultAdam <- permutationAdam(1000,combined,150)
+
+ggplot()+
+  geom_histogram(aes(x=resultAdam), col = "red")+
+  geom_vline(xintercept = 1.33, col = "blue")+
+  labs(title="Distribution of Difference in Means of random groupings of Ratio.2004 and Ratio.2002")+
+  xlab("Difference")
+
+percentileData <- sum(resultAdam<1.33)/1000
+percentileData
 ```
+
+####Conclusion
+My actual difference in means of the two groups was 1.33, represented by the blue vertical line in the histogram.  As a percentile, it is represented by the decimal number below the histogram. Looking at the graph influences me to accept the alternate hypothesis because it seems as if the distribution of mean differences is so spread out, it is not easily concluded that the vertical line is the center of the data. However, the percentile shows that the actual difference in means of the two groups is very close to the 50th percentile of the permutation data, so therefore I would lean towards accepting the null hypothesis.
+
+
 
