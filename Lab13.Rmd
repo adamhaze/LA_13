@@ -6,11 +6,116 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 ```{r}
 library(tidyverse)
-read_csv("TrafficDeathsPer1000.csv")
+trafficData <- read_csv("TrafficDeathsPer1000.csv")%>%
+  rename(Country = "Traffic mortality per 100,000, age adjusted")
+populationDensity <- read_csv("PopulationDensity.csv")%>%
+  rename(Country = "Population density (per square km)")
+
+trafficDataReal <- trafficData %>%
+  select(Country,`2002`,`2004`)
+trafficDataReal$`2002` <- as.numeric(trafficDataReal$`2002`)
+trafficDataReal$`2004` <- as.numeric(trafficDataReal$`2004`)
+
+populationDensityReal <- populationDensity %>%
+  select(Country,`2002`,`2004`)
+populationDensityReal$`2002` <- as.numeric(populationDensityReal$`2002`)
+populationDensityReal$`2004` <- as.numeric(populationDensityReal$`2004`)
+
+
+mergedData <- trafficDataReal %>%
+  inner_join(populationDensityReal, by = "Country", suffix = c(".trafficDeath",".popDensity"))
+
+mergedDataReal <- na.omit(mergedData)
+```
+
+###Overall Question: Do traffic deaths increase with higher population density?
+
+####Importance:
+
+####Our Data:
+
+####Conclusion:
+
+
+
+
+###Adam's Findings
+
+This map_dbl function is calculating the mean of each column in my trafficDataAdam dataset which represents the mean number of traffic deaths per 100,000 people per country in 2002 and 2004.
+```{r, include = TRUE}
+
+trafficDataAdam <- na.omit(trafficDataReal) %>%
+  select(`2002`,`2004`)
+  
+as_tibble(trafficDataAdam)%>%
+  map_dbl(mean)
+```
+
+
+This function accepts a data frame and a different function, and loops through the data frame, applying the inputted function to each column.  In my case I took my merged data set with each country's traffic deaths per 100,000 ppl in 2002 and 2004, and population density in 2002 and 2004.  I calculated the mean and standard deviation of each column, showing a good distribution of the data in each column.
+```{r, include=TRUE}
+mergedDataAdam <- mergedDataReal %>%
+  select(2:5)
+
+myColSummary <- function(df,myFun){
+  myOut <- vector("double", length(df))
+  for(i in seq(df)){
+    myOut[i] <- myFun(df[[i]])
+  }
+  return(myOut)
+}
+myColSummary(mergedDataAdam,mean)
+myColSummary(mergedDataAdam,sd)
+
+```
+
+```{r}
+AdamData <- mergedDataReal %>%
+  mutate(Ratio.2002 = `2002.popDensity` / `2002.trafficDeath`, 
+         Ratio.2004 = `2004.popDensity` / `2004.trafficDeath`)
+#higher the ratio, lower the traffic deaths relative to population density
+
+mean2002 <- AdamData %>%
+  select(Ratio.2002)%>%
+  summarise(mean = mean(Ratio.2002))
+mean2004 <- AdamData %>%
+  select(Ratio.2004)%>%
+  summarise(mean = mean(Ratio.2004))
+
+differenceActual = mean2004 - mean2002
+
+testData <- AdamData %>%
+  select(Ratio.2002, Ratio.2004)
+
+permutationAdam <- function(perms = 1000, values, n1)
+{
+  outputMean <- vector("double", perms)
+  for (i in c(1:perms))
+  {
+    # Randomly separate vector "values" into disjoint 
+    # groups of size "n1" and "length(values) - n1" respectively
+    
+    vector1 <- sample(values, n1)
+    vector2 <- setdiff(values, vector1)
+
+    # Compute the sample means for the two groups from 
+    firstMean <- mean(vector1)
+    secondMean <- mean(vector2)
+    
+    # Compute the difference in sample means
+    meanDifference <- firstMean - secondMean
+    
+    outputMean[i] <- meanDifference
+  }
+  # Return new updated vector, created in step 1
+  return(outputMean)
+}
+
+permutationAdam()
 ```
 
