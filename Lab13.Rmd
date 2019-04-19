@@ -184,86 +184,66 @@ Test Statistic: Sample Median
 
 ```
 
+###Erin's Findings
 
-
-###Jasmine's Findings:
-#### My functions: map function
-This map_dbl function is calculating the maximum value of each column in my 'jazz_traffic' dataset which represents the maximum number of traffic deaths per 20,000 people per country in years 2002 and 2004.
+The map_dbl function is used here to calculate the mean of each column in my trafficErin dataset which represents the mean number of traffic deaths per 100,000 people per country in 2002 and 2004.
 
 ```{r, include = TRUE}
+trafficErin <- na.omit(trafficDataReal) %>%
+  select(`2002`,`2004`)
 
-jazz_traffic <- na.omit(trafficDataReal)%>%
-  select('2002','2004')
-
-jazz_new <- jazz_traffic%>%
-  map_dbl(max)
-jazz_new/5
-
+as_tibble(trafficErin)%>%
+  map_dbl(mean)
 ```
 
-#### My functions: new function
-This new function will accept two parameters. Those being a data set that is provided as well as an already existing function. The function takes the data from only the second through fifth column of our data (that are numeric),and then applies the provided, existing functions to each of the values in each of the comulns. Here, I found the median and maximum numbers of traffic deaths for every 20,000 individuals. 
+This function accepts a data frame and a different function, and loops through the data frame, applying the inputted function to each column.  In my case I took my merged data set with each country's traffic deaths per 100,000 ppl in 2002 and 2004, and population density in 2002 and 2004.  I calculated the difference from 2004 to 2002 for population density and then did the same thing for traffic deaths and then calculated the mean for those columns. 
 
-```{r}
-merged_jazz <- mergedDataReal %>%
+```{r, include=TRUE}
+mergedErin <- mergedDataReal %>%
   select(2:5)
 
-myCol_jazz <- function(data, real_funct) {
-  
-  output <- vector("double", length(data))
-  
-  for(i in seq.int(data)){
-    
-    output[i] <- (real_funct(data[[i]])/5)
-    
+myColSummary <- function(df,myFun){
+  myOut <- vector("double", length(df))
+  for(i in seq(df)){
+    myOut[i] <- myFun(df[[i]])
   }
-  
-  return(output)
-  
+  return(myOut)
 }
-
-myCol_jazz(merged_jazz,max)
-myCol_jazz(merged_jazz,median)
-
-
+myColSummary(mergedErin,mean)
+myColSummary(mergedErin,sd)
 
 ```
 
-####Jasmine's Permutation:
-Null:
+####Permutation Question:Do the mean differences between the years 2002 and 2004 for Traffic Deaths and Pop. Density have a statistically significant difference in their mean ratio?
 
-Alternate:
+Null: Difference in means between 2004 and 2002 of Population density and Traffic deaths = Difference in means between random groupings of the 2.
+Alternate: Difference in means between 2004 and 2002 of Population density and Traffic deaths != Difference in means between random groupings of the 2.
 
-Test Statistic: 
+Test Statistic: Sample Mean
 
 ```{r}
+ErinData <- mergedDataReal %>%
+  mutate(Ratio.diffTraff = `2004.trafficDeath` - `2002.trafficDeath`, Ratio.diffPop = `2004.popDensity` - `2002.popDensity`)
+#show if it will increase in pop density and traffic deaths between 2004 and 2002.
 
-jazz1 <- mergedDataReal%>%
-  filter(' 2002.trafficDeath'> 3, '2004.trafficDeath' > 3) 
+differenceTrafficDeath <- ErinData %>%
+  select(Ratio.diffTraff)%>%
+  summarise(mean = mean(Ratio.diffTraff))
+differencePopDensity <- ErinData %>%
+  select(Ratio.diffPop)%>%
+  summarise(mean = mean(Ratio.diffPop))
 
-Jazz_data <- jazz1 %>%
-  mutate(Ratio1.2002 = `2002.trafficDeath` / `2002.popDensity`, 
-         Ratio1.2004 = `2004.trafficDeath` / `2004.popDensity`)
+differenceActual = differenceTrafficDeath - differencePopDensity
+differenceActual
 
-#higher the ratio, the higher percentage of greater than 3 traffic deaths relative to the population density per 20,000 people
+testDataErin <- ErinData %>%
+  select(Ratio.diffTraff, Ratio.diffPop)
 
-max2002 <- Jazz_data %>%
-  select(Ratio1.2002)%>%
-  summarise(max_ = max(Ratio1.2002))
-max2004 <- Jazz_data %>%
-  select(Ratio1.2004)%>%
-  summarise(max_1 = max(Ratio1.2004))
+combinedErin <- c(testDataErin$Ratio.diffTraff, testDataErin$Ratio.diffPop)
 
-difference = max2004 - max2002
-
-testing <- Jazz_data %>%
-  select(Ratio1.2002, Ratio1.2004)
-
-combined_data <- c(testing$Ratio1.2002, testing$Ratio1.2004)
-
-Jazz_perm <- function(perms = 1000, values, n1)
+permutationErin <- function(perms = 1000, values, n1)
 {
-  outputMax <- vector("double", perms)
+  outputMean <- vector("double", perms)
   for (i in c(1:perms))
   {
     # Randomly separate vector "values" into disjoint 
@@ -272,25 +252,34 @@ Jazz_perm <- function(perms = 1000, values, n1)
     vector1 <- sample(values, n1)
     vector2 <- setdiff(values, vector1)
 
-    # Compute the sample medians for the two groups from 
-    firstMax <- max(vector1)
-    secondMax <- max(vector2)
+    # Compute the sample means for the two groups from 
+    firstMean <- mean(vector1)
+    secondMean <- mean(vector2)
     
-    # Compute the difference in sample medians
-    maxDifference <- firstMax - secondMax
+    # Compute the difference in sample means
+    meanDifference <- firstMean - secondMean
     
-    outputMax[i] <- maxDifference
+    outputMean[i] <- meanDifference
   }
   # Return new updated vector, created in step 1
-  return(outputMax)
+  return(outputMean)
 }
 
-results <- Jazz_perm(1000,combined_data)
+resultErin <- permutationErin(1000,combinedErin,150)
 
+ggplot()+
+  geom_histogram(aes(x=resultErin), col = "pink")+
+  geom_vline(xintercept = -1.33, col = "green")+
+  labs(title="Distribution of the differene between Pop Density and Traffic Deaths between 2002 and 2004 means")+
+  xlab("Change between 2002 and 2004 means of population density and traffic death")
 
+percentileDataErin <- sum(resultErin < -1.33)/1000
+percentileDataErin
 ```
 
+####Conclusion
+First, I created two new variables for the difference in numbers between traffics death between 2002 and 2004 and the difference between population density between 2002 and 2004. From the histogram shown,it displays a relatively normal distribution, meaning the population density and traffic deaths between 2002 and 2004 were remaining relatively the same. This allowed the normal distribution to occurr.There was abnormaility in calculating actual difference between the difference of the mean differences. It lead to a -1.33, which was skewed to the left on the graph. For this conclusion, I would lean towards rejecting the null hypothesis.
 
 ####Who did what?
-Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means.
+Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means. Erin loaded in her individual section of investigating the mean difference of population density to traffic death during the years 2002 and 2004. Through this, she found the difference between the years and then took the mean of the new mutated columns, then running a permutation test to find out the effect. Overall, she thinks we should reject the null hypothesis.
 
