@@ -38,6 +38,7 @@ mergedDataReal <- na.omit(mergedData)
 ####Importance:
 
 ####Our Data:
+Our team used 2 datasets, one representing traffic deaths per 100,000 people in various countries throughout the years, and the other representing population density in various countries throughout the years.  We decided to only look at the years 2002 and 2004 for both datasets because those years had the most complete data for each.  We then merged the two datasets by using an inner_join() the country name, and omitted all countries that had any NA values.  This gave us a complete dataset showing each country's traffic deaths and population density side by side for the years 2002 and 2004.
 
 ####Conclusion:
 
@@ -74,7 +75,7 @@ myColSummary(mergedDataAdam,sd)
 
 ```
 
-####Permutation
+####Permutation Question: Do the years 2002 and 2004 have statistically significant differences in their mean ratio of population density to traffic deaths? And do the year labels matter?
 Null: Difference In Means between(Ratio.2004 and Ratio.2002) = Difference In Means between(Random groupings of the 2)
 
 Alternate:Difference In Means between(Ratio.2004 and Ratio.2002) != Difference In Means between(Random groupings of the 2)
@@ -138,7 +139,7 @@ percentileData
 ```
 
 ####Conclusion
-My actual difference in means of the two groups was 1.33, represented by the blue vertical line in the histogram.  As a percentile, it is represented by the decimal number below the histogram. Looking at the graph influences me to accept the alternate hypothesis because it seems as if the distribution of mean differences is so spread out, it is not easily concluded that the vertical line is the center of the data. However, the percentile shows that the actual difference in means of the two groups is very close to the 50th percentile of the permutation data, so therefore I would lean towards accepting the null hypothesis.
+First, I created 2 new variables representing the ratio of population density to traffic deaths per 100,000 for each country, the two variables represented these ratios for 2002 and 2004.  I then calculated the mean ratio for each year, and found the difference, noticing that 2004 had a slightly higher mean ratio meaning that year countries had less traffic deaths relative to population density on average.  My actual difference in means of the two groups was 1.33, represented by the blue vertical line in the histogram.  As a percentile, it is represented by the decimal number below the histogram. Looking at the graph influences me to accept the alternate hypothesis because it seems as if the distribution of mean differences is so spread out, it is not easily concluded that the vertical line is the center of the data. However, the percentile shows that the actual difference in means of the two groups is very close to the 50th percentile of the permutation data, so therefore I would lean towards accepting the null hypothesis.
 
 
 ###Richard's Findings
@@ -178,3 +179,11 @@ Null: Difference in Medians between(Ratio.2004 and Ratio.2002) = Difference in M
 Alternate:Difference in Medians between(Ratio.2004 and Ratio.2002) != Difference in Medians between(Random groupings of the 2)
 
 Test Statistic: Sample Median
+
+```{r}
+
+```
+
+####Who did what?
+Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means.
+
