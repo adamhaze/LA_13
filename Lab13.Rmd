@@ -282,8 +282,8 @@ First, I created two new variables for the difference in numbers between traffic
 
 ###Jasmine's Findings:
 #### My functions: map function
-#####My Question: What is the realtionship between the maximum number of traffic deaths for every 20,000 people? 
-This map_dbl function is calculating the maximum value of each column in my 'jazz_traffic' dataset which represents the maximum number of traffic deaths per 20,000 people per country in years 2002 and 2004.
+#####My Question: What is the realtionship between the maximum number of traffic deaths for every 100,000 people? 
+This map_dbl function is calculating the maximum value of each column in my 'jazz_traffic' dataset which represents the maximum number of traffic deaths per 100,000 people per country in years 2002 and 2004.
 
 ```{r, include = TRUE}
 
@@ -297,7 +297,7 @@ jazz_new/5
 ```
 
 #### My functions: new function
-This new function will accept two parameters. Those being a data set that is provided as well as an already existing function. The function takes the data from only the second through fifth column of our data (that are numeric),and then applies the provided, existing functions to each of the values in each of the comulns. Here, I found the median and maximum numbers of traffic deaths for every 20,000 individuals. 
+This new function will accept two parameters. Those being a data set that is provided as well as an already existing function. The function takes the data from only the second through fifth column of our data (that are numeric),and then applies the provided, existing functions to each of the values in each of the comulns. Here, I found the median and maximum numbers of traffic deaths for every 100,000 individuals. 
 
 ```{r}
 merged_jazz <- mergedDataReal %>%
@@ -334,7 +334,7 @@ Test Statistic:
 ```{r}
 
 jazz1 <- mergedDataReal%>%
-  filter(' 2002.trafficDeath'> 3, '2004.trafficDeath' > 3) 
+  filter(`2002.trafficDeath`> 3, `2004.trafficDeath` > 3) 
 
 Jazz_data <- jazz1 %>%
   mutate(Ratio1.2002 = `2002.trafficDeath` / `2002.popDensity`, 
@@ -355,7 +355,7 @@ testing <- Jazz_data %>%
   select(Ratio1.2002, Ratio1.2004)
 
 combined_data <- c(testing$Ratio1.2002, testing$Ratio1.2004)
-
+combined_data
 Jazz_perm <- function(perms = 1000, values, n1)
 {
   outputMax <- vector("double", perms)
@@ -380,8 +380,8 @@ Jazz_perm <- function(perms = 1000, values, n1)
   return(outputMax)
 }
 
-results <- Jazz_perm(1000,combined_data)
-
+results <- Jazz_perm(1000,combined_data,100)
+results
 
 ```
 #### Conclusion: 
