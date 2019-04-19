@@ -181,8 +181,63 @@ Alternate:Difference in Medians between(Ratio.2004 and Ratio.2002) != Difference
 Test Statistic: Sample Median
 
 ```{r}
+RichardData <- mergedDataReal %>%
+mutate(Ratio.2002 = `2002.popDensity` / `2002.trafficDeath`, 
+Ratio.2004 = `2004.popDensity` / `2004.trafficDeath`)
+#higher the ratio, lower the traffic deaths relative to population density
 
+median2002 <- RichardData %>%
+select(Ratio.2002)%>%
+summarise(median = median(Ratio.2002))
+median2004 <- RichardData %>%
+select(Ratio.2004)%>%
+summarise(median = median(Ratio.2004))
+
+differenceActual = median2004 - median2002
+
+RichardTestData <- RichardData %>%
+select(Ratio.2002, Ratio.2004)
+
+combined <- c(RichardTestData$Ratio.2002, RichardTestData$Ratio.2004)
+
+permutationRichard <- function(perms = 1000, values, n1)
+{
+  outputMedian <- vector("double", perms)
+  for (i in c(1:perms))
+  {
+  # Randomly separate vector "values" into disjoint 
+  # groups of size "n1" and "length(values) - n1" respectively
+  
+  vector1 <- sample(values, n1)
+  vector2 <- setdiff(values, vector1)
+  
+  # Compute the sample means for the two groups from 
+  firstMedian <- median(vector1)
+  secondMedian <- median(vector2)
+  
+  # Compute the difference in sample means
+  medianDifference <- firstMedian - secondMedian
+  
+  outputMedian[i] <- medianDifference
+  }
+  # Return new updated vector, created in step 1
+  return(outputMedian)
+}
+
+resultRichard <- permutationRichard(1000,combined,150)
+
+ggplot()+
+geom_histogram(aes(x=resultRichard), col = "Green")+
+geom_vline(xintercept = 0, col = "Red")+
+labs(title="Distribution of Difference in Medians of random groupings of Ratio.2004 and Ratio.2002")+
+xlab("Difference in Medians")
+
+PercentileRichard <- sum(resultRichard<0)/1000
+PercentileRichard
 ```
+
+####Conclusion
+To begin, I used the merged data that Adam had created earlier which made 2 new variables to represent the ratio of traffic deaths per country per 100,000 people. From there, I decided to analyze the median ratio for 2002/2004, and found the difference between the two, noticing that 2002 had a slightly higher median ratio. This means that in 2002, countries had less traffic deaths relative to population density on average.  My actual difference in medians of the two groups was 0, represented by the red vertical line in the histogram.  When taken into persepctive of percentiles, it represents the decimal number below the histogram. By analyzing the graph, I am persuaded to accept the alternate hypothesis because it seems as if the distribution of median differences is very spread out. However, the percentile calculated shows that the actual difference in medians of the two groups is very close to the 50th percentile of the permutation data, so therefore I would lean towards accepting the null hypothesis which states that the difference in Medians between(Ratio.2004 and Ratio.2002) = Difference in Medians between(Random groupings of the 2).
 
 ###Erin's Findings
 
@@ -386,5 +441,5 @@ results
 ```
 #### Conclusion: 
 ####Who did what?
-Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means. Erin loaded in her individual section of investigating the mean difference of population density to traffic death during the years 2002 and 2004. Through this, she found the difference between the years and then took the mean of the new mutated columns, then running a permutation test to find out the effect. Overall, she thinks we should reject the null hypothesis.
+Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means. Richard used the pre-loaded data in his individual section to look at the ratio of population density to traffic deaths. Richard found the median for each year and then used that information to create a permutation test to see if the labels had any influence on the medians. Erin loaded in her individual section of investigating the mean difference of population density to traffic death during the years 2002 and 2004. Through this, she found the difference between the years and then took the mean of the new mutated columns, then running a permutation test to find out the effect. Overall, she thinks we should reject the null hypothesis.
 
