@@ -336,110 +336,219 @@ percentileDataErin
 First, I created two new variables for the difference in numbers between traffics death between 2002 and 2004 and the difference between population density between 2002 and 2004. From the histogram shown,it displays a relatively normal distribution, meaning the population density and traffic deaths between 2002 and 2004 were remaining relatively the same. This allowed the normal distribution to occurr.There was abnormaility in calculating actual difference between the difference of the mean differences. It lead to a -1.33, which was skewed to the left on the graph. For this conclusion, I would lean towards rejecting the null hypothesis.
 
 ###Jasmine's Findings:
+
 #### My functions: map function
+
 #####My Question: What is the realtionship between the maximum number of traffic deaths for every 100,000 people? 
+
 This map_dbl function is calculating the maximum value of each column in my 'jazz_traffic' dataset which represents the maximum number of traffic deaths per 100,000 people per country in years 2002 and 2004.
+
+
 
 ```{r, include = TRUE}
 
+
+
 jazz_traffic <- na.omit(trafficDataReal)%>%
+
   select('2002','2004')
 
+
+
 jazz_new <- jazz_traffic%>%
+
   map_dbl(max)
+
 jazz_new/5
+
+
 
 ```
 
+
+
 #### My functions: new function
+
 This new function will accept two parameters. Those being a data set that is provided as well as an already existing function. The function takes the data from only the second through fifth column of our data (that are numeric),and then applies the provided, existing functions to each of the values in each of the comulns. Here, I found the median and maximum numbers of traffic deaths for every 100,000 individuals. 
 
+
+
 ```{r}
+
 merged_jazz <- mergedDataReal %>%
+
   select(2:5)
 
+
+
 myCol_jazz <- function(data, real_funct) {
+
   
+
   output <- vector("double", length(data))
+
   
+
   for(i in seq.int(data)){
+
     
+
     output[i] <- (real_funct(data[[i]])/5)
+
     
+
   }
+
   
+
   return(output)
+
   
+
 }
 
+
+
 myCol_jazz(merged_jazz,max)
+
 myCol_jazz(merged_jazz,median)
 
 
 
+
+
+
+
 ```
 
+
+
 ####Jasmine's Permutation:
-Null:
 
-Alternate:
+Nu: The differences in maximum values is going to be greater than the values between the years 2002-2004
 
-Test Statistic: 
+Alternate: The differences in maximum values is less than those reported in our data set between 2002 and 2004. 
+
+Test Statistic: Sample of maxmimum differentiantion between 2002 and 2004.
+
 
 ```{r}
 
+
+
 jazz1 <- mergedDataReal%>%
+
   filter(`2002.trafficDeath`> 3, `2004.trafficDeath` > 3) 
 
-Jazz_data <- jazz1 %>%
-  mutate(Ratio1.2002 = `2002.trafficDeath` / `2002.popDensity`, 
-         Ratio1.2004 = `2004.trafficDeath` / `2004.popDensity`)
 
-#higher the ratio, the higher percentage of greater than 3 traffic deaths relative to the population density per 20,000 people
+
+Jazz_data <- jazz1 %>%
+
+  mutate(Ratio1.2002 =`2002.popDensity` / `2002.trafficDeath`, 
+
+         Ratio1.2004 = `2004.popDensity`/ `2004.trafficDeath`)
+
+
+
+#higher the ratio, the higher percentage of greater than 3 traffic deaths relative to the population density per 100,000 people
+
+
 
 max2002 <- Jazz_data %>%
+
   select(Ratio1.2002)%>%
+
   summarise(max_ = max(Ratio1.2002))
+
 max2004 <- Jazz_data %>%
+
   select(Ratio1.2004)%>%
+
   summarise(max_1 = max(Ratio1.2004))
+
+
 
 difference = max2004 - max2002
 
+
+
 testing <- Jazz_data %>%
+
   select(Ratio1.2002, Ratio1.2004)
 
+
+
 combined_data <- c(testing$Ratio1.2002, testing$Ratio1.2004)
+
 combined_data
+
 Jazz_perm <- function(perms = 1000, values, n1)
+
 {
+
   outputMax <- vector("double", perms)
+
   for (i in c(1:perms))
+
   {
+
     # Randomly separate vector "values" into disjoint 
+
     # groups of size "n1" and "length(values) - n1" respectively
+
     
+
     vector1 <- sample(values, n1)
+
     vector2 <- setdiff(values, vector1)
 
+
+
     # Compute the sample medians for the two groups from 
+
     firstMax <- max(vector1)
+    firstMax
+
     secondMax <- max(vector2)
+    secondMax
+
     
+
     # Compute the difference in sample medians
+
     maxDifference <- firstMax - secondMax
+
     
+
     outputMax[i] <- maxDifference
+
   }
+
   # Return new updated vector, created in step 1
+
   return(outputMax)
+
 }
 
+
 results <- Jazz_perm(1000,combined_data,100)
-results
+
+ggplot()+
+  geom_histogram(aes(x=results), fill = "blue")+
+  geom_vline(xintercept = 1.33, col = "yellow")+
+  labs(title="Distribution of Difference in Maximum Values of random groupings of Ratio.2004 and Ratio.2002")+
+  xlab("Difference")
+
+percentileData <- sum((results)/1000)
+percentileData
+
 
 ```
+
 #### Conclusion: 
+I created new variables for the difference in max values in traffic deaths between 2002 and 2004 and the difference between population density between 2002 and 2004. The histogram displayed above shows a relatively broken distribution, meaning the population density and traffic deaths between 2002 and 2004 were concstantly fluctuating. This created a rift in calculating an accurate difference between the difference of the maximum differences. It lead to a -1.33 median value, which was displayed to the right of the graph. in conclusion, the hypothesis has been confirmed.
+ 
+
 ####Who did what?
-Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means. Richard used the pre-loaded data in his individual section to look at the ratio of population density to traffic deaths. Richard found the median for each year and then used that information to create a permutation test to see if the labels had any influence on the medians. Erin loaded in her individual section of investigating the mean difference of population density to traffic death during the years 2002 and 2004. Through this, she found the difference between the years and then took the mean of the new mutated columns, then running a permutation test to find out the effect. Overall, she thinks we should reject the null hypothesis.
+Adam loaded in the two datasets, tidied and filtered them, and then merged them together, he then described the data in the team section.  In his individual section he investigated the ratio of population density to traffic deaths, finding the mean for each year, and running a permutation test to find out if the year labels influence the difference in means. Richard used the pre-loaded data in his individual section to look at the ratio of population density to traffic deaths. Richard found the median for each year and then used that information to create a permutation test to see if the labels had any influence on the medians. Erin loaded in her individual section of investigating the mean difference of population density to traffic death during the years 2002 and 2004. Through this, she found the difference between the years and then took the mean of the new mutated columns, then running a permutation test to find out the effect. Overall, she thinks we should reject the null hypothesis. Jasmine took the comparison between the maximum number of traffic deaths per 20,000 people from the years 2002 and 2004. She then compared the percentile of deaths for each of the years to analyze weather that maximum has stayed level, decreased, or increased. In the end, she concluded that there was an increased in number of traffic deaths between the time gap and this suggested that there was an increase in incidents or deaths per incidnet that has occured. therefore, confirm the null hypothesis. 
 
